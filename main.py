@@ -1,42 +1,10 @@
 import json
 from typing import List
+from git_parse import *
+from files_with_score import *
+from argparse import ArgumentParser
 
 max_score = 100
-
-class File:
-    def __init__(self, name: str, score: int):
-        self.name = name
-        self.score = score
-        
-    def toJson(self):
-        return json.dumps(self, default=lambda o: o.__dict__, indent=4)
-        
-    @staticmethod
-    def from_json(json_data):
-        return File(name=json_data["name"], score=json_data["score"])
-
-class Files:
-    def __init__(self, files: List[File]):
-        self.files = files
-        
-    def get_file_with_name(self, name: str):
-        for file in self.files:
-            if file.name == name:
-                return file        
-        raise Exception(f"File with name {name} not found")
-    
-    def sort_by_score(self):
-        self.files = sorted(self.files, key=lambda file: file.score, reverse=True) 
-        
-    def toJson(self):
-        return json.dumps(self, default=lambda o: o.__dict__, indent=4)
-    
-    @staticmethod
-    def from_json(json_data):
-        files = []
-        for file in json_data["files"]:
-            files.append(File.from_json(file))
-        return Files(files=files)
 
 def get_coverage_data():
     return {
@@ -52,7 +20,10 @@ def get_coverage_data():
         ]
     }
 
-def get_git_data():
+def get_git_data(repo_path: Path) -> Files:
+    parser = RepoParser(repo_path)
+    return parser.process_files()
+
     return {
         'files': [
             {
@@ -79,9 +50,22 @@ def merge(git_files: Files, coverage_files: Files) -> Files:
         output.append(File(name=git_file.name, score=git_file.score + coverage_file.score))
     return Files(files=output)
 
+class Options:
+    def __init__(self, repo_path: Path):
+        self.repo_path = repo_path
+
+    @staticmethod
+    def ParseFromArgv():
+        parser = ArgumentParser()
+        parser.add_argument("-p", "--path", help="Repo to analyse", required=True)
+        args = parser.parse_args()
+        return Options(args.path)
+
 def main():
+    options = Options.ParseFromArgv()
+    
     coverage = Files.from_json(get_coverage_data())
-    git = Files.from_json(get_git_data())
+    git = get_git_data(Path(options.repo_path))
     
     total = merge(git, coverage)
     total.sort_by_score()
