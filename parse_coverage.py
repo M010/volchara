@@ -58,7 +58,7 @@ class CoverageParser:
                                 if target["target"]["line_number_end"] - target["target"]["line_number_begin"]
                                 > COUNT_LINES_FOR_TARGET]
         for target in self.data["targets"]:
-            target["coef"]["score"] = target["target"]["line_number_end"] - target["target"]["line_number_begin"]
+            target["coef"]["score"] = (target["target"]["line_number_end"] - target["target"]["line_number_begin"]) * 10
 
         # get info about files from coverage_sum.json
         coverage_files = open(self.coverage_files)
@@ -67,7 +67,7 @@ class CoverageParser:
         for coverage in coverage_json["files"]:
             file = {}
             file["name"] = str(Path(self.root_dir, coverage["filename"]).absolute())  
-            file["score"] = coverage["line_percent"]
+            file["score"] =  (100 - coverage["line_percent"]) * 2
             self.data["files"].append(file)
 
         return self.data
