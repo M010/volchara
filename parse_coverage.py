@@ -17,7 +17,7 @@ class CoverageParser:
 
     def createTarget(self, line_number_begin: int, line_number_end: int, file_name: str):
         target = {}
-        target["file"] = file_name
+        target["file"] = str(Path(self.root_dir, file_name).absolute()) 
         target["target"] = {"count":0, "line_number_begin":0, "line_number_end":0}
         target["target"]["count"] = 0
         target["target"]["line_number_begin"] = line_number_begin
@@ -66,7 +66,7 @@ class CoverageParser:
 
         for coverage in coverage_json["files"]:
             file = {}
-            file["name"] = coverage["filename"]
+            file["name"] = str(Path(self.root_dir, coverage["filename"]).absolute())  
             file["score"] = coverage["line_percent"]
             self.data["files"].append(file)
 
