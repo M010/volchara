@@ -18,15 +18,20 @@ class RepoParser:
             for i in range(num, num + len(line)):
                 print(i, " ", commit, " ", commit.author, "", ts)
             num = num + len(line)
-        file_score = 0 # TODO
+        file_score = 0  # TODO
         return File(name=filepath, score=file_score)
 
     def process_files(self) -> Files:
-        filepath = "C:\\Users\\nik-1\\OneDrive\\Рабочий стол\\volk\\protobuf\\generate_changelog.py"
-        files_to_process = [filepath]
+        files_to_process = []
+        for (dir_path, dir_names, file_names) in walk(repo_path):
+            if ".git" in dir_names:
+                dir_names.remove(".git")
+            for file_name in file_names:
+                full_path = Path(dir_path, file_name)
+                files_to_process.insert(full_path)
+
         files_with_score = Files(files=[])
         for file in files_to_process:
             res = self.process_file(file)
             files_with_score.files.append(res)
         return files_with_score
-        
