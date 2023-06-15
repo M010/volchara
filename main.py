@@ -3,10 +3,14 @@ from typing import List
 from git_parse import *
 from files_with_score import *
 from argparse import ArgumentParser
+from parse_coverage import *
 
 max_score = 100
 
-def get_coverage_data():
+def get_coverage_data() -> Files:    
+    parser = CoverageParser("coverage.json", "coverage_sum.json")
+    return Files.from_json(parser.process_files())
+
     return {
         'files': [
             {
@@ -23,19 +27,6 @@ def get_coverage_data():
 def get_git_data(repo_path: Path) -> Files:
     parser = RepoParser(repo_path)
     return parser.process_files()
-
-    return {
-        'files': [
-            {
-                "name":"main.cpp", 
-                "score": 20
-            },
-            {
-                "name":"main2.cpp", 
-                "score": 10
-            }
-        ]
-    }
     
 def merge(git_files: Files, coverage_files: Files) -> Files:
     output = []
@@ -64,7 +55,8 @@ class Options:
 def main():
     options = Options.ParseFromArgv()
     
-    coverage = Files.from_json(get_coverage_data())
+    coverage = get_coverage_data()
+    print(coverage.toJson())
     git = get_git_data(Path(options.repo_path))
     
     total = merge(git, coverage)

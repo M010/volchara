@@ -1,6 +1,4 @@
+#include "folder/foo.hpp"
 #include <iostream>
-#include "foo.hpp"
 
-int main() {
-    std::cout << "Hello world" << std::endl;
-}
+int main() { std::cout << "Hello world" << std::endl; }

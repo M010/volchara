@@ -19,7 +19,8 @@ class RepoParser:
         for [commit, line] in self.repo.blame('HEAD', filepath):
             ts = datetime.fromtimestamp(commit.committed_date).strftime('%Y-%m-%d %H:%M:%S')
             for i in range(num, num + len(line)):
-                print(i, " ", commit, " ", commit.author, "", ts)
+                #print(i, " ", commit, " ", commit.author, "", ts)
+                pass
             num = num + len(line)
         file_score = 0  # TODO
         return File(name=filepath, score=file_score)
@@ -40,6 +41,3 @@ class RepoParser:
             res = self.process_file(file)
             files_with_score.files.append(res)
         return files_with_score
-
-parser = RepoParser(Path("."))
-files = parser.process_files()
