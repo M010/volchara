@@ -7,10 +7,10 @@ COUNT_LINES_FOR_TARGET = 5
 # gcovr --json coverage.json
 # gcovr --json-summary coverage_sum.json
 class CoverageParser:
-    def __init__(self, root_dir: str, coverage_targets: str, coverage_files: str):
+    def __init__(self, root_dir: str, coverage_targets: str, coverage_summary: str):
         self.root_dir = root_dir
-        self.coverage_targets = str(Path(root_dir, coverage_targets).absolute())
-        self.coverage_files = str(Path(root_dir, coverage_files).absolute())
+        self.coverage_targets = coverage_targets
+        self.coverage_summary = coverage_summary
         
         # our api coverage
         self.data = {"targets":[], "files":[]}
@@ -61,8 +61,8 @@ class CoverageParser:
             target["coef"]["score"] = (target["target"]["line_number_end"] - target["target"]["line_number_begin"]) * 10
 
         # get info about files from coverage_sum.json
-        coverage_files = open(self.coverage_files)
-        coverage_json = json.load(coverage_files)
+        coverage_summary = open(self.coverage_summary)
+        coverage_json = json.load(coverage_summary)
 
         for coverage in coverage_json["files"]:
             file = {}
