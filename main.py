@@ -7,22 +7,10 @@ from parse_coverage import *
 
 max_score = 100
 
-def get_coverage_data() -> Files:    
-    parser = CoverageParser("coverage.json", "coverage_sum.json")
+def get_coverage_data() -> Files:
+    root_dir = "./example"
+    parser = CoverageParser(root_dir, "coverage.json", "coverage_sum.json")
     return Files.from_json(parser.process_files())
-
-    return {
-        'files': [
-            {
-                "name":"main.cpp", 
-                "score": 100
-            },
-            {
-                "name":"main2.cpp", 
-                "score": 50
-            }
-        ]
-    }
 
 def get_git_data(repo_path: Path) -> Files:
     parser = RepoParser(repo_path)

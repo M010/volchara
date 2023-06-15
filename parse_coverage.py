@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 
 COUNT_LINES_FOR_TARGET = 5
@@ -6,9 +7,10 @@ COUNT_LINES_FOR_TARGET = 5
 # gcovr --json coverage.json
 # gcovr --json-summary coverage_sum.json
 class CoverageParser:
-    def __init__(self, coverage_targets: str, coverage_files: str):
-        self.coverage_targets = coverage_targets
-        self.coverage_files = coverage_files
+    def __init__(self, root_dir: str, coverage_targets: str, coverage_files: str):
+        self.root_dir = root_dir
+        self.coverage_targets = str(Path(root_dir, coverage_targets).absolute())
+        self.coverage_files = str(Path(root_dir, coverage_files).absolute())
         
         # our api coverage
         self.data = {"targets":[], "files":[]}
