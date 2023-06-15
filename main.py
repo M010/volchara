@@ -34,8 +34,11 @@ def merge(git_files: Files, coverage_files: Files) -> Files:
             # If coverage not found assume no coverage at all
             # so, file should be surely checked
             coverage_file = File(name=git_file.name, score=max_score)
-            git_rate = (1 - coverage_file.score) * 100
-        output.append(File(name=git_file.name, score=git_file.score + git_rate))
+
+
+        git_rate = (1 - git_file.score) * 100
+        assert (git_rate >= 0 and git_rate < 101)
+        output.append(File(name=git_file.name, score=coverage_file.score + git_rate))
     return Files(files=output)
 
 
@@ -71,12 +74,13 @@ def main():
     coverage = get_coverage_data(root_dir=options.root_dir,
                                  coverage_targets=options.coverage_targets,
                                  coverage_summary=options.coverage_summary)
-    print(coverage.toJson())
+    # print(coverage.toJson())
     git = get_git_data(Path(options.repo_path))
 
     total = merge(git, coverage)
     total.sort_by_score()
     print(total.toJson())
+    print(len(total.files))
 
 
 if __name__ == "__main__":
