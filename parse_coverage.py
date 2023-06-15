@@ -69,7 +69,3 @@ class CoverageParser:
             self.data["files"].append(file)
 
         return self.data
-
-        # For Nikita Grebnev
-        with open('volchar_test.json', 'w') as outfile:
-            json.dump(self.data, outfile)
