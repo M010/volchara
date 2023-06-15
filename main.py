@@ -43,8 +43,8 @@ class Options:
     @staticmethod
     def ParseFromArgv():
         parser = ArgumentParser()
-        parser.add_argument("-p", "--path", help="Repo to analyse", default=".")
-        parser.add_argument("-r", "--source_root", help="Root of target project (it must contains .git folder!)", default="./example")
+        parser.add_argument("-p", "--path", help="Repo to analyse(it must contains .git folder!)", default=".")
+        parser.add_argument("-r", "--source_root", help="Root source folder(it used as root in coverage json files)", default="./example")
         parser.add_argument("-t", "--coverage_targets", help="Path to file with coverage info per files", default="./example/coverage.json")
         parser.add_argument("-f", "--coverage_summary", help="Path to file with coverage summary", default="./example/coverage_sum.json")
         args = parser.parse_args()

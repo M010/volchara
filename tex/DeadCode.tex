@@ -12,6 +12,8 @@
 
 \newcommand{\myskip}{\vspace{\baselineskip}}
 
+\setbeamertemplate{caption}[numbered]
+
 
 \setbeamercolor{itemize item}{fg=black}
 \setbeamercolor{itemize subitem}{fg=black}
@@ -22,8 +24,8 @@
 \setbeamerfont{alerted text}{series=\bfseries}
 
 
-\title{Анализ \enquote{мертвого} кода}
-\author{Команда \enquote{Шерстяные волчары с мощными лапищами}}
+\title{Анализ ``мертвого'' кода}
+\author{Команда ``Шерстяные волчары с мощными лапищами''}
 
 
 
@@ -35,7 +37,8 @@
 
 \begin{frame}{Немного о нас}
     \begin{figure}
-        \includegraphics[width=0.5\textwidth]{memes/volf.jpg}
+        \includegraphics[width=0.45\textwidth]{memes/volf.jpg}
+        \caption{Про название}
     \end{figure}
 \end{frame}
 
@@ -50,17 +53,25 @@
     \only<2>{Решили искать мёртвый код на примере нашей кодовой базы C++}
 \end{frame}
 
-\begin{frame}{\enquote{Мёртвый} код}
+\begin{frame}{``Мёртвый'' код}
     \begin{figure}
-        \includegraphics[width=1.0\textwidth]{memes/dead_code.jpg}
+        \includegraphics[width=0.9\textwidth]{memes/dead_code.jpg}
+        \caption{Плавно переходим к теме кода}
     \end{figure}
 \end{frame}
 
-\begin{frame}{\enquote{Мёртвый} код}
+\begin{frame}{``Мёртвый'' код}
     Мёртвый код - это код, который не влияет на работу программы и может быть удалён.
 \end{frame}
 
-\begin{frame}{\enquote{Мёртвый} код}
+\begin{frame}{``Мёртвый'' код}
+    \begin{figure}
+        \includegraphics[width=0.75\textwidth]{memes/dead_code_scheme.jpg}
+        \caption{Схемка из интернетов}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{``Мёртвый'' код}
     Разные синтаксические единицы
     \begin{itemize}
         \item Переменные
@@ -70,14 +81,7 @@
     \end{itemize}
 \end{frame}
 
-\begin{frame}{\enquote{Мёртвый} код}
-    \begin{figure}
-        \includegraphics[width=0.4\textwidth]{memes/finding_dead_code.png}
-        \caption{Поиск мёртвого кода по версии ИИ}
-    \end{figure}
-\end{frame}
-
-\begin{frame}{\enquote{Мёртвый} код}
+\begin{frame}{``Мёртвый'' код}
     Разные способы выявления
     \begin{itemize}
         \item Статический анализ
@@ -94,7 +98,14 @@
     \end{itemize}
 \end{frame}
 
-\begin{frame}{\enquote{Мёртвый} код}
+\begin{frame}{``Мёртвый'' код}
+    \begin{figure}
+        \includegraphics[width=0.4\textwidth]{memes/finding_dead_code.png}
+        \caption{Поиск мёртвого кода по версии ИИ}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{``Мёртвый'' код}
     Динамический анализ
     \begin{itemize}
         \item[\xmark] Синтаксические единицы
@@ -102,16 +113,16 @@
     \end{itemize}
 \end{frame}
 
-\begin{frame}{\enquote{Мёртвый} код}
+\begin{frame}{``Мёртвый'' код}
     Что ещё можно было бы искать
     \begin{itemize}
-        \item \enquote{Забытые}(не добавленные в cmake проект) файлы
-        \item \enquote{Забытые}(не влитые в develop/master) ветки в git
+        \item ``Забытые''(не добавленные в cmake проект) файлы
+        \item ``Забытые''(не влитые в develop/master) ветки в git
         \item Unreachable(недостижимый) код
     \end{itemize}
 \end{frame}
 
-\begin{frame}{\enquote{Мёртвый} код}
+\begin{frame}{``Мёртвый'' код}
     \begin{figure}
         \includegraphics[width=0.18\textwidth]{memes/git.png}
         \caption{\textit{git}ar hero или мёртвые ветки в git}
@@ -138,7 +149,7 @@
 \end{frame}
 
 \begin{frame}{Блоки кода vs файлы}
-    Можно давать оценку \enquote{мёртвости} по файлам. Её легче получить, но она не слишком информативна. Это наш MVP1.
+    Можно давать оценку ``мёртвости'' по файлам. Её легче получить, но она не слишком информативна. Это наш MVP1.
 
     \myskip
     Следующая итерация - это оценка для отдельных блоков кода(под блоками понимаются подряд идущие не покрытые тестами строки кода). Это наш MVP2.
@@ -165,12 +176,21 @@
 
 \begin{frame}{Система фильтров}
     \begin{itemize}
-        \item Фильтр для каждого блока/файла возвращает какую-то оценку \enquote{в попугаях}
+        \item Фильтр для каждого блока/файла возвращает какую-то оценку ``в попугаях''
         \item Эти оценки умножаются на вес фильтра и затем суммируются
         \item Чем больше итоговое значение для файла/блока, тем больше вероятность того, что там есть мёртвый код
         \item Затем файлы/блоки кода сортируются на основе этой оценки
     \end{itemize}
 \end{frame}
+
+\begin{frame}{Заключение}
+    \begin{center}
+        Работает - не трогай!
+
+        Не работает? Это MVP...
+    \end{center}
+\end{frame}
+
 
 
 \end{document}
