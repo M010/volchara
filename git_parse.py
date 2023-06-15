@@ -13,21 +13,38 @@ class RepoParser:
             raise Exception(f"Invalid path: {repo_path.absolute()}")
         self.repo_path = repo_path
         self.repo = git.Repo(repo_path)
+        self._get_date_ranges()
+
+    def _get_date_ranges(self):
+        head_commit = next(self.repo.iter_commits())
+        initial_commit: git.Commit
+        *_, initial_commit = self.repo.iter_commits()
+        self.time_bound = [initial_commit.committed_date, head_commit.committed_date]
+
+    def _normalize_date_of_commit(self, commit: git.Commit):
+        normalized_bound = self.time_bound[1] - self.time_bound[0]
+        assert (normalized_bound > 1)
+        normalized_value = (commit.committed_date - self.time_bound[0])
+        percent = normalized_value / normalized_bound
+        return percent
 
     def process_file(self, filepath: Path) -> File:
+        file_score = 0
         num = 1
-        for [commit, line] in self.repo.blame('HEAD', filepath):
-            ts = datetime.fromtimestamp(commit.committed_date).strftime('%Y-%m-%d %H:%M:%S')
-            for i in range(num, num + len(line)):
-                #print(i, " ", commit, " ", commit.author, "", ts)
-                pass
-            num = num + len(line)
-        file_score = 0  # TODO
+        for [commit, lines] in self.repo.blame('HEAD', filepath):
+            file_score += self._normalize_date_of_commit(commit) * len(lines)
+            num = num + len(lines)
+
+        file_score /= num
         return File(name=filepath, score=file_score)
 
     def process_files(self) -> Files:
         files_to_process = []
         for (dir_path, dir_names, file_names) in os.walk(self.repo_path):
+            if len(dir_names) != 0:
+                ignored_dirs = self.repo.ignored(dir_names)
+                dir_names[:] = [name for name in dir_names if name not in ignored_dirs]
+
             if ".git" in dir_names:
                 dir_names.remove(".git")
             for file_name in file_names:
@@ -41,3 +58,9 @@ class RepoParser:
             res = self.process_file(file)
             files_with_score.files.append(res)
         return files_with_score
+
+
+if __name__ == '__main__':
+    print(os.getcwd())
+    parser = RepoParser(Path("."))
+    files = parser.process_files()
