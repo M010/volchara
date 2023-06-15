@@ -1,5 +1,15 @@
 import json
 
+def createTarget(line_number_begin: int, line_number_end: int, file_name: str, data):
+    target = {}
+    target["file"] = file_name
+    target["target"] = {"count":0, "line_number_begin":0, "line_number_end":0}
+    target["target"]["count"] = 0
+    target["target"]["line_number_begin"] = line_number_begin
+    target["target"]["line_number_end"] = line_number_end
+    target["coef"] = {}
+    data["targets"].append(target)
+
 # start 
 # gcovr --json coverage.json
 # gcovr --json-summary coverage_sum.json
@@ -15,35 +25,34 @@ coverage_targets = open("coverage.json")
 coverage_json = json.load(coverage_targets)
 
 for coverage in coverage_json["files"]:
-    target = {}
-    target["file"] = coverage["file"]
-    target["target"] = {"count":0, "line_number_begin":0, "line_number_end":0}
-
-    flag = 0
-    current_line = 0
-    prev_line = 0
-
+    vector_line = []
     for line in coverage["lines"]:
-        current_line = line["line_number"]
         if line["count"] == 0:
-            flag += 1
-        elif flag > COUNT_LINES_FOR_TARGET and line["count"] != 0:
-            target["target"]["count"] = 0
-            target["target"]["line_number_begin"] = current_line - flag
-            target["target"]["line_number_end"] = current_line
-            flag = 0
+            vector_line.append(line["line_number"])
+
+    for i, val in enumerate(vector_line):
+        if i == 0:
+            count = 1
+            begin = val
+            continue
+
+        if val - count == begin:
+            count += 1
         else:
-            prev_line = 
-            flag = 0
+            createTarget(begin, vector_line[i - 1], coverage["file"], data)
+            begin = val
+            count = 1
+            continue
 
-    if flag > 0:
-        target["target"]["count"] = 0
-        target["target"]["line_number_begin"] = current_line - flag
-        target["target"]["line_number_end"] = current_line
+        if i == len(vector_line) - 1 and count > COUNT_LINES_FOR_TARGET:
+            createTarget(begin, val, coverage["file"], data)
 
-    
-    target["coef"] = []
-    data["targets"].append(target)
+
+data["targets"] = [target for target in data["targets"] if target["target"]["line_number_end"] - target["target"]["line_number_begin"] > COUNT_LINES_FOR_TARGET]
+for target in data["targets"]:
+    target["coef"]["score"] = target["target"]["line_number_end"] - target["target"]["line_number_begin"]
+
+
 
 
 # get info about files from coverage_sum.json
