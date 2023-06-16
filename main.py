@@ -27,7 +27,7 @@ def merge(git_files: Files, coverage_files: Files) -> Files:
         except Exception as e:
             if Path(git_file.name).suffix in ('.hpp', ".h"):
                 print(
-                    f"Header file missing in coverage, skip it - assume no func implementations in header file found ({e})")
+                    f"Trace: Header file missing in coverage, skip it - assume no func implementations in header file found ({e})")
                 continue
 
             print(f"Warn: file found in git but coverage missing. {e}")
@@ -43,11 +43,12 @@ def merge(git_files: Files, coverage_files: Files) -> Files:
 
 
 class Options:
-    def __init__(self, repo_path: Path, root_dir: str, coverage_targets: str, coverage_summary: str):
+    def __init__(self, repo_path: Path, root_dir: str, coverage_targets: str, coverage_summary: str, output_folder: str):
         self.repo_path = repo_path
         self.root_dir = root_dir
         self.coverage_targets = coverage_targets
         self.coverage_summary = coverage_summary
+        self.output_folder = output_folder
 
     @staticmethod
     def ParseFromArgv():
@@ -59,28 +60,43 @@ class Options:
                             default="./example/coverage.json")
         parser.add_argument("-f", "--coverage_summary", help="Path to file with coverage summary",
                             default="./example/coverage_sum.json")
+        parser.add_argument("-o", "--output_folder", help="Folder to save output artifacts to", default="./output")
         args = parser.parse_args()
         return Options(
             repo_path=args.path,
             root_dir=args.source_root,
             coverage_targets=args.coverage_targets,
-            coverage_summary=args.coverage_summary
+            coverage_summary=args.coverage_summary,
+            output_folder=args.output_folder,
         )
 
 
 def main():
     options = Options.ParseFromArgv()
+    
+    # creating output dir if not exists
+    Path(options.output_folder).mkdir(parents=True, exist_ok=True)
 
-    coverage = get_coverage_data(root_dir=options.root_dir,
+    coverage_score_by_files = get_coverage_data(root_dir=options.root_dir,
                                  coverage_targets=options.coverage_targets,
                                  coverage_summary=options.coverage_summary)
-    # print(coverage.toJson())
-    git = get_git_data(Path(options.repo_path))
-
-    total = merge(git, coverage)
-    total.sort_by_score()
-    print(total.toJson())
-    print(len(total.files))
+    coverage_score_by_files.sort_by_score()
+    coverage_score_by_files.save_to_file(Path(options.output_folder, "coverage_score_by_files.json")),
+    
+    git_score_by_files = get_git_data(Path(options.repo_path))
+    git_score_by_files.sort_by_score()
+    git_score_by_files.save_to_file(Path(options.output_folder, "git_score_by_files.json")),
+    
+    total_score_by_files = merge(git_score_by_files, coverage_score_by_files)
+    total_score_by_files.sort_by_score()
+    total_score_by_files.save_to_file(Path(options.output_folder, "total_score_by_files.json")),
+    
+    print()
+    print("==========================")
+    print("============DONE==========")
+    print("===TOTAL=SCORE=BY=FILES:==")
+    print(total_score_by_files.toJson())
+    print("==========================")
 
 
 if __name__ == "__main__":

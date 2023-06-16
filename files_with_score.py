@@ -1,5 +1,6 @@
 import json
 from typing import List
+from pathlib import Path
 
 class File:
     def __init__(self, name: str, score: int):
@@ -35,3 +36,7 @@ class Files:
         for file in json_data["files"]:
             files.append(File.from_json(file))
         return Files(files=files)
+    
+    def save_to_file(self, filename: Path):
+        with open(filename, 'w', encoding='utf-8') as f:
+            f.write(self.toJson())
