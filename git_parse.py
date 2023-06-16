@@ -47,8 +47,9 @@ class RepoParser:
             delta = self._normalize_date_of_commit(commit)
             for line_number in range(num, num + len(lines)):
                 if line_number == end:
-                    return target_score/len_of_target_block
-                target_score += delta
+                    return target_score / len_of_target_block
+                if line_number >= start:
+                    target_score += delta
             num = num + len(lines)
 
         return target_score / len_of_target_block

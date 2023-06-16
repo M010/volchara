@@ -73,13 +73,25 @@ def main():
     json_coverage_processed = cov_parser.process_files()
     coverage_score_by_files = Files.from_json(json_coverage_processed)
 
-    # coverage_score_by_targets = json_coverage_processed["targrets"]
-
     coverage_score_by_files.sort_by_score()
     coverage_score_by_files.save_to_file(Path(options.output_folder, "coverage_score_by_files.json")),
 
     git_parser = RepoParser(Path(options.repo_path))
 
+    coverage_score_by_targets = json_coverage_processed["targets"]
+    for targ in coverage_score_by_targets:
+        tar_tar = targ['target']
+        file_l = targ['file']
+        beg_l = tar_tar['line_number_begin']
+        end_l = tar_tar['line_number_end']
+        # print(file_l, beg_l, end_l, targ['coef']['score'])
+        targ_git_score = git_parser.process_target(file_l, beg_l, end_l)
+        assert 0 <= targ_git_score < 1.1
+        targ['coef']['git_score'] = (1 - targ_git_score)
+        targ['coef']['total'] = targ['coef']['score'] * (1 - targ_git_score)
+
+    targets = sorted(coverage_score_by_targets, key=lambda x: x['coef']['score'], reverse=True)
+    print(json.dumps(targets, default=lambda o: o.__dict__, indent=4))
 
     git_score_by_files = git_parser.process_files()
     git_score_by_files.sort_by_score()
