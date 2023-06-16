@@ -28,7 +28,7 @@ class RepoParser:
         percent = normalized_value / normalized_bound
         return percent
 
-    def process_file(self, filepath: Path) -> File:
+    def _get_file_score(self, filepath: Path) -> File:
         file_score = 0
         num = 1
         for [commit, lines] in self.repo.blame('HEAD', filepath):
@@ -37,6 +37,21 @@ class RepoParser:
 
         file_score /= num
         return File(name=filepath, score=file_score)
+
+    def process_target(self, filepath: Path, start: int, end: int ):
+        assert (start < end)
+        len_of_target_block = end - start
+        target_score = 0
+        num = 1
+        for [commit, lines] in self.repo.blame('HEAD', filepath):
+            delta = self._normalize_date_of_commit(commit)
+            for line_number in range(num, num + len(lines)):
+                if line_number == end:
+                    return target_score/len_of_target_block
+                target_score += delta
+            num = num + len(lines)
+
+        return target_score / len_of_target_block
 
     def process_files(self) -> Files:
         files_to_process = []
@@ -55,7 +70,7 @@ class RepoParser:
 
         files_with_score = Files(files=[])
         for file in files_to_process:
-            res = self.process_file(file)
+            res = self._get_file_score(file)
             files_with_score.files.append(res)
         return files_with_score
 

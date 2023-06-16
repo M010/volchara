@@ -9,16 +9,6 @@ from parse_coverage import *
 max_score = 100
 
 
-def get_coverage_data(root_dir: str, coverage_targets: str, coverage_summary: str) -> Files:
-    parser = CoverageParser(root_dir=root_dir, coverage_targets=coverage_targets, coverage_summary=coverage_summary)
-    return Files.from_json(parser.process_files())
-
-
-def get_git_data(repo_path: Path) -> Files:
-    parser = RepoParser(repo_path)
-    return parser.process_files()
-
-
 def merge(git_files: Files, coverage_files: Files) -> Files:
     output = []
     for git_file in git_files.files:
@@ -35,7 +25,6 @@ def merge(git_files: Files, coverage_files: Files) -> Files:
             # so, file should be surely checked
             coverage_file = File(name=git_file.name, score=max_score)
 
-
         git_rate = (1 - git_file.score) * 100
         assert (git_rate >= 0 and git_rate < 101)
         output.append(File(name=git_file.name, score=coverage_file.score + git_rate))
@@ -43,7 +32,8 @@ def merge(git_files: Files, coverage_files: Files) -> Files:
 
 
 class Options:
-    def __init__(self, repo_path: Path, root_dir: str, coverage_targets: str, coverage_summary: str, output_folder: str):
+    def __init__(self, repo_path: Path, root_dir: str, coverage_targets: str, coverage_summary: str,
+                 output_folder: str):
         self.repo_path = repo_path
         self.root_dir = root_dir
         self.coverage_targets = coverage_targets
@@ -73,24 +63,32 @@ class Options:
 
 def main():
     options = Options.ParseFromArgv()
-    
+
     # creating output dir if not exists
     Path(options.output_folder).mkdir(parents=True, exist_ok=True)
 
-    coverage_score_by_files = get_coverage_data(root_dir=options.root_dir,
-                                 coverage_targets=options.coverage_targets,
-                                 coverage_summary=options.coverage_summary)
+    cov_parser = CoverageParser(root_dir=options.root_dir,
+                                coverage_targets=options.coverage_targets,
+                                coverage_summary=options.coverage_summary)
+    json_coverage_processed = cov_parser.process_files()
+    coverage_score_by_files = Files.from_json(json_coverage_processed)
+
+    # coverage_score_by_targets = json_coverage_processed["targrets"]
+
     coverage_score_by_files.sort_by_score()
     coverage_score_by_files.save_to_file(Path(options.output_folder, "coverage_score_by_files.json")),
-    
-    git_score_by_files = get_git_data(Path(options.repo_path))
+
+    git_parser = RepoParser(Path(options.repo_path))
+
+
+    git_score_by_files = git_parser.process_files()
     git_score_by_files.sort_by_score()
     git_score_by_files.save_to_file(Path(options.output_folder, "git_score_by_files.json")),
-    
+
     total_score_by_files = merge(git_score_by_files, coverage_score_by_files)
     total_score_by_files.sort_by_score()
     total_score_by_files.save_to_file(Path(options.output_folder, "total_score_by_files.json")),
-    
+
     print()
     print("==========================")
     print("============DONE==========")
